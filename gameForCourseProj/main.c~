@@ -1,0 +1,661 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ncurses.h>
+
+/*GAME VERSION*/
+const float GAME_VERSION = 1.105;
+/*END OF GAME VERSION*/
+
+/*CONTROL KEYS*/
+char CONTROL_KEY_UP = 'w' ;
+char CONTROL_KEY_DOWN = 's' ;
+char CONTROL_KEY_LEFT = 'a' ;
+char CONTROL_KEY_RIGHT = 'd' ;
+char CONTROL_KEY_ENTER = '\n' ;
+char CONTROL_KEY_END = 'u' ;
+/*WILL BE ABLE TO CHANGE IN SETTING SOON*/
+
+/*CAN BE CHANGED IN SETTING*/   /*  hard     normal     hard  */
+int DIFFICULT_DELAY = 5;        /* var = 2; var = 5; var = 20;*/
+int DIFFICULT_DENSITY = 3;      /* var = 1; var = 3; var = 8; */ 
+int DIFFICULT_SLEEP_DELAY = 1;  /* var = 2; var = 1 ;var = 1; */
+int DIFFICULT = 2;				  /* 1->knife 2->axe 3-chainsaw*/
+/*SET UP THE DIFFICULTY OF GAME*/
+
+/*COMMON CONSTANTS*/
+
+#define TRUE 1
+#define FALSE 0
+const int _NULL = 0;
+const int CORRECT_EXIT=1;
+const int WRONG_EXIT=-1;
+const int BASE=8;/*depends on numbers of tree sections*/
+/*END OF COMMON CONSTANTS*/
+
+/*HELP VARIABLES UND STRUCTURES*/
+WINDOW*winScore;
+int EXIT;
+int SCORE = 20;
+struct Branch /*STRUCTURE TO STORE THE MAP OF TREE . EXAMPLE : left == 010010 AND right == 100001  */ 
+{
+	unsigned left:6;
+	unsigned right:6;
+
+};
+/*END OF VARIABLES AND STRUCTURES*/
+
+/*DECLARATION OF FUNCTIONS*/
+static void printSettingDifficult(WINDOW* sWin, int cond);
+static void SettingDifficultSelection(int * cond);
+static void SettingDifficult();
+static void SettingSelection(int * cond);
+static void sleep();
+static void MenuPrint(int cond);
+static void MenuSelection(int* cond);
+static void Game();
+static void Info(int* cond);
+static void Exit();
+static void printTree(int num,struct Branch obj);
+static void printStdscr(int cond);
+static void printSetting(WINDOW*sWin,int cond);
+static void Setting();
+static void printDifficultMod(int y, int x);
+static void printDisplay(struct Branch * obj,char mode,char ch);
+static void nextObjMap(struct Branch* obj);
+static void printScore(int y, int x);
+static void GamePrintInfo();
+static void SettingRule();
+static void GameVersionPrint();
+/*END OF FUNCTION DECLARATION*/
+
+int main(void)
+{
+	WINDOW* sec;
+	sec = newwin(5,5,7,7);
+	char ch;
+	int  cond=0;
+	initscr();
+	noecho();
+	
+	while(TRUE)
+	{	
+		MenuPrint(cond);
+		ch=getch();
+		erase();
+		if( ch == CONTROL_KEY_UP ){
+			if(cond>1){
+				cond--;
+			}else if(cond <= 1){
+				cond=4;
+			}
+		}else if( ch == CONTROL_KEY_DOWN ){
+			if(cond<4){
+				cond++;	
+			}else if(cond>=4){
+				cond=1;
+			}
+		}else if( ch == CONTROL_KEY_ENTER ){
+				MenuSelection(&cond);
+		}
+	}
+	endwin();
+	return 0;
+}
+
+/*===========Function============*/
+
+
+/******************BEGIN_SETTING*******************/
+static void Setting()
+{
+	int cond=0;
+	char ch='0';
+	const int WHIGTH=8+1;
+	const int WLENGTH=13;
+	const int WYCOORD=5;
+	const int WXCOORD=30;
+	WINDOW *sWin=newwin(WHIGTH,WLENGTH,WYCOORD,WXCOORD);
+	while(TRUE){
+		printSetting(sWin,cond);
+		ch=getch();
+		if( ch == CONTROL_KEY_UP ){
+			if(cond<2)
+				cond=4;
+			else
+				cond--;
+		}else if( ch == CONTROL_KEY_DOWN ){
+			if(cond>3)
+				cond=1;
+			else 
+				cond++;
+		}else if( ch == CONTROL_KEY_ENTER ){
+			if(cond==4){
+				erase();
+				delwin(sWin);
+				return;
+			}else{ 
+				SettingSelection( &cond );
+			}
+		}
+	}
+}
+static void GameVersionPrint()
+{
+	const int WHIGTH=1;
+	const int WLENGTH=11;
+	const int WYCOORD=19;
+	const int WXCOORD=61;
+	WINDOW *tempWin=newwin(WHIGTH,WLENGTH,WYCOORD,WXCOORD);
+	wprintw(tempWin,"ver. %1.3f", GAME_VERSION);
+	wrefresh(tempWin);
+	delwin(tempWin);
+	return;
+}
+static void SettingRule()
+{
+	MenuPrint(5);
+	GameVersionPrint();
+	getch();
+	return;
+}
+static void SettingDifficult()
+{
+	int cond=0;
+	char ch='0';
+	const int WHIGTH=8;
+	const int WLENGTH=13;
+	const int WYCOORD=5;
+	const int WXCOORD=30;
+	WINDOW *sWin=newwin(WHIGTH,WLENGTH,WYCOORD,WXCOORD);
+	while(TRUE){
+		printSettingDifficult(sWin,cond);
+		ch=getch();
+		if( ch == CONTROL_KEY_UP ){
+			if(cond<2)
+				cond=4;
+			else
+				cond--;
+		}else if( ch == CONTROL_KEY_DOWN ){
+			if(cond>3)
+				cond=1;
+			else 
+				cond++;
+		}else if( ch == CONTROL_KEY_ENTER ){
+			if(cond==4){
+				erase();
+				delwin(sWin);
+				return;
+			}
+			else{
+				SettingDifficultSelection(&cond);
+				erase();
+				delwin(sWin);
+				return;
+			}
+		}
+	}
+}
+static void SettingDifficultSelection(int * cond)
+{
+	switch(*cond)
+	{
+		case 0:
+			*cond = 1;
+			break;
+		case 1:
+			DIFFICULT_DELAY = 20;
+			DIFFICULT_DENSITY = 8;
+			DIFFICULT_SLEEP_DELAY = 2;	
+			DIFFICULT = 1;
+			break;
+		case 2:
+			DIFFICULT_DELAY = 5;
+			DIFFICULT_DENSITY = 3;
+			DIFFICULT_SLEEP_DELAY = 1;
+			DIFFICULT = 2;
+			break;
+		case 3:
+			DIFFICULT_DELAY = 2;
+			DIFFICULT_SLEEP_DELAY = 2;
+			DIFFICULT_DENSITY = 1;
+			DIFFICULT = 3;
+			break;
+		default:
+			endwin();
+			printf("SelectionError; press any key to exit...");
+			getchar();
+			exit(WRONG_EXIT);
+	}
+	return;
+}
+static void SettingSelection(int * cond)
+{
+	switch(*cond)
+	{
+		case 0:
+			*cond = 1;
+			break;
+		case 1:
+			printw("controlSetting");
+			Exit();		
+			/*SettingControl(); WILL BE SOON*/ 
+			break;
+		case 2:
+			SettingRule();	
+			break;
+		case 3:
+			SettingDifficult();
+			break;
+		default:
+			endwin();
+			printf("SelectionError; press any key to exit...");
+			getchar();
+			exit(WRONG_EXIT);
+	}
+	return;
+}
+
+static void printSettingDifficult(WINDOW*sWin,int cond)
+{
+	FILE *file;
+	const int SizeOfExString=20;
+	char * str=(char*)malloc(sizeof(char)*SizeOfExString);
+	switch(cond)
+	{
+		case 0:
+			file=fopen("settingDifficult/netral.txt","r");
+			printStdscr(0);
+			break;
+		case 1:
+			file=fopen("settingDifficult/difficult1.txt","r");
+			printStdscr(1);
+			break;
+		case 2:
+			file=fopen("settingDifficult/difficult2.txt","r");
+			printStdscr(2);
+			break;
+		case 3:
+			file=fopen("settingDifficult/difficult3.txt","r");
+			printStdscr(1);
+			break;
+		case 4:
+			file=fopen("settingDifficult/exit.txt","r");
+			printStdscr(2);
+			break;
+		default:
+			break;
+	}
+	strcpy(str,"");
+	werase(sWin);
+	while(fgets(str,SizeOfExString,file))
+	{
+		wprintw(sWin,"%s",str);
+		strcpy(str,"");
+	}
+	wrefresh(sWin);
+	fclose(file);
+	GameVersionPrint();
+	return;
+}
+
+/*Function to print backgrounds during "SettindMod"*/
+static void printStdscr(int cond)
+{
+	FILE* file;
+	char* str=(char*)malloc(sizeof(char)*81);
+	/*Open needed file to make "animation"*/
+	switch(cond)
+	{
+		case 0:
+			file=fopen("menus/menuNetral.txt","r");
+			break;
+		case 1:
+			file=fopen("menus/menuGame.txt","r");
+			break;
+		case 2:
+			file=fopen("menus/menuInfo.txt","r");
+	}
+	/*clean the main win(stdscr)*/
+	erase();
+	refresh();
+	/*fullfill setting area*/
+	strcpy(str,"");
+	while(fgets(str,81,file))
+	{
+		printw("%s",str);
+		strcpy(str,"");
+	}
+	/*close the file*/
+	fclose(file);
+	/*make setting scr visible*/
+	refresh();
+	return;
+}
+static void printSetting(WINDOW*sWin,int cond)
+{
+	FILE *file;
+	const int SizeOfExString=20;
+	char * str=(char*)malloc(sizeof(char)*SizeOfExString);
+	switch(cond)
+	{
+		case 0:
+			file=fopen("setting/settingNetral.txt","r");
+			printStdscr(0);
+			break;
+		case 1:
+			file=fopen("setting/settingControl.txt","r");
+			printStdscr(1);
+			break;
+		case 3:
+			file=fopen("setting/settingDiffic.txt","r");
+			printStdscr(1);
+			break;
+		case 4:
+			file=fopen("setting/settingExit.txt","r");
+			printStdscr(2);
+			break;
+		case 2:
+			file=fopen("setting/settingRules.txt","r");
+			printStdscr(2);
+			break;
+		default:
+			break;
+	}
+	strcpy(str,"");
+	werase(sWin);
+	while(fgets(str,SizeOfExString,file))
+	{
+		wprintw(sWin,"%s",str);
+		strcpy(str,"");
+	}
+	wrefresh(sWin);
+	fclose(file);
+	if( cond == 3 )
+		printDifficultMod( 3 ,6 );
+	wrefresh(sWin);	
+	GameVersionPrint();
+	return;
+}
+static void printDifficultMod(int y,int x)
+{
+	const int WHIGTH=1;
+	int WLENGTH=13;
+	int WYCOORD=y;
+	int WXCOORD=x;
+	switch(DIFFICULT){
+		case 1: WLENGTH = 11;break;
+		case 2: WLENGTH = 9;break;
+		case 3: WLENGTH = 14;break;
+	}
+	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+	switch(DIFFICULT){
+		case 1: wprintw(win,"mod:-Knife-");break;
+		case 2: wprintw(win,"mod:-Axe-");break;
+		case 3: wprintw(win,"mod:-Chainsaw-");break;
+	}
+	wrefresh(win);
+	delwin(win);
+}
+/**************END_SETTING*******************/
+
+
+/**************BEGIN_MAIN_MENU***************/
+/*Exit option in main menu*/
+static void Exit()
+{
+	/*clean the main scr*/
+	erase();
+	/*end stdscr*/
+	endwin();
+	/*finish program with +0*/ 
+	exit(CORRECT_EXIT);	
+}
+/*selections of main menu*/
+static void MenuSelection(/*choice from main menu*/int* cond)
+{
+	switch(*cond)
+	{
+		case 0:
+			*cond=1;
+			break;
+		case 1:
+			/*function to game mod*/
+			Game();
+			break;
+		case 2:
+			/*show info about game by changing cond to zero: menuNetral.txt*/
+			*cond=0;
+			break;
+		case 3:
+			/*show setting part of menu*/
+			Setting();
+			break;
+		case 4:
+			/*place to exit*/
+			Exit();
+		default:
+			/*Exit from game if cond(user choice) is wrong*/
+			/*finish stdscr*/
+			endwin();
+			/*show the detail of erroe*/
+			printf("SelectionError; press any key to exit...");
+			/*waitiong*/
+			getchar();
+			/*exitind from programe with (-1) code:eror code*/
+			exit(WRONG_EXIT);
+	}
+	return;
+}
+
+static void MenuPrint(int cond)
+{
+	int i;
+	FILE* file;
+	char* temp=(char*)malloc(sizeof(char)*24);
+	sleep();
+	switch(cond)
+	{
+		case 5:
+			file=fopen("setting/SettingRule/SettingRule.txt","r");
+			break;
+		case 0:
+			file=fopen("menus/menuNetral.txt","r");
+			break;
+		case 1:
+			file=fopen("menus/menuGame.txt","r");
+			break;
+		case 2:
+			file=fopen("menus/menuInfo.txt","r");
+			break;
+		case 3:
+			file=fopen("menus/menuSetting.txt","r");
+			break;
+		case 4:
+			file=fopen("menus/menuExit.txt","r");
+			break;
+		default: 
+			erase();
+			printw("MenuError; key[Enter] to exit...");
+			getchar();
+			endwin();
+			exit(WRONG_EXIT)	;
+	}
+	erase();
+	while(fgets(temp,24,file))
+	{
+		printw("%s",temp);
+		strcpy(temp,"");
+	}
+	refresh();
+	fclose(file);
+	GameVersionPrint();
+	return;
+}
+/*******************END_MAIN_MENU**********************/
+
+
+/*******************BEGIN_GAME*************************/
+static void printDisplay(struct Branch* obj,char mode,char ch)
+{
+	char temp;
+	temp=BASE;
+	erase();
+	printTree(5,*obj);
+	GamePrintInfo();
+	while(temp>=2)
+	{
+		if(temp & obj->left)
+			printTree(1,*obj);
+		else if(temp & obj->right)
+	 		printTree(2,*obj);
+		else 
+			printTree(0,*obj);
+		temp>>=1;
+	}
+		if(ch == CONTROL_KEY_LEFT){
+			if(obj->left & 1){
+				erase();
+				refresh();
+				EXIT = 1;
+				return ;
+			}else
+				printTree((mode=='p')?(6):(3),*obj);
+		}else if(ch == CONTROL_KEY_RIGHT){
+			if(obj->right & 1){
+				erase();
+				refresh();
+				EXIT = 1;
+				return;
+			}
+			else
+				printTree((mode=='p')?(7):(4),*obj);
+		}else if( ch == CONTROL_KEY_END ){
+			erase();
+			EXIT=1;
+			refresh();
+			return ;
+		}
+	printTree(5,*obj);
+/*	GamePrintInfo();*/
+	sleep();
+	return;
+}
+static void GamePrintInfo()
+{
+	printDifficultMod( 3, 6 );
+	printScore( 4, 6 );
+}
+static void printScore(int y,int x)
+{
+	const int WHIGTH = 1;
+	int WLENGTH = 80;
+	int WYCOORD = y;
+	int WXCOORD = x;
+	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+	wprintw(win,"score:%d",SCORE);
+	wrefresh(win);
+	delwin(win);
+}
+static void nextObjMap(struct Branch* obj)
+{
+	int temp=BASE;
+	obj->left>>=1;
+	obj->right>>=1;
+	if((int)( rand() % DIFFICULT_DENSITY )==0){
+		if((int)(rand()%2)==0)
+			obj->left|=temp;
+		else
+			obj->right|=temp;
+	}
+}
+static void Game()
+{
+	SCORE = 2000;
+	char ch='a';
+	char chEx='0';
+	struct Branch obj;
+	int temp=BASE;
+	EXIT=0;
+	halfdelay( DIFFICULT_DELAY );
+	obj.left=0;
+	obj.right=0;
+	while(SCORE>0 && EXIT==0)
+	{
+		nextObjMap(&obj);
+		chEx=ch;
+			printDisplay(&obj,'p',ch);
+			printDisplay(&obj,'0',ch);
+			if ( EXIT == TRUE )
+				return;
+			ch=getch();
+			if( ch == CONTROL_KEY_LEFT || ch == CONTROL_KEY_RIGHT ){
+				SCORE++;
+			}
+			if(ch==ERR)
+				SCORE-=4;
+			if(ch==ERR || (ch != CONTROL_KEY_END && ch != CONTROL_KEY_LEFT && ch != CONTROL_KEY_RIGHT ) ) 
+				ch=chEx;	
+	}
+	EXIT = 0;
+	return;
+}
+static void printTree(int num,struct Branch obj)
+{
+	const int SizeOfExString=30;
+	char* str=(char*)malloc(sizeof(char)*SizeOfExString);
+	FILE* file;
+	switch(num)
+	{
+		case 6:
+			file=fopen("game/heroLeftChop.txt","r");
+			break;
+		case 7:
+			file=fopen("game/heroRightChop.txt","r");
+			break;
+		case 5:
+			file=fopen("game/headLine.txt","r");
+			break;
+		case 4:
+			if(obj.left & 1)
+				file=fopen("game/heroRightTree1.txt","r");
+			else
+				file=fopen("game/heroRightTree0.txt","r");
+			break;
+		case 3:
+			if(obj.right&1)
+				file=fopen("game/heroLeftTree2.txt","r");
+			else
+				file=fopen("game/heroLeftTree0.txt","r");
+			break;
+		case 0:
+			file=fopen("game/tree0.txt","r");
+			break;
+		case 1:
+			file=fopen("game/tree1.txt","r");
+			break;
+		case 2:
+			file=fopen("game/tree2.txt","r");
+			break;
+		default:
+			endwin();
+			printf("Eror");
+			getchar();
+			exit(WRONG_EXIT);
+	}
+	strcpy(str,"");
+	while(fgets(str,SizeOfExString,file))
+	{
+		printw("%s",str);
+		strcpy(str,"");
+	}
+	refresh();
+	fclose(file);
+}
+static void sleep()
+{
+	int i;
+	for(i=0;i<(6000000/DIFFICULT_SLEEP_DELAY) && EXIT == 0 ;i++){}
+}
+
+/***********************END_GAME***********************/

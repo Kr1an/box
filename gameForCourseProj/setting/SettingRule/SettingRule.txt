@@ -1,0 +1,23 @@
+* * *----------------------------------------------------------------------* * *
+* * *----------------------------------------------------------------------* * *
+* * *----------------------------------------------------------------------* * *
+| | |  Store:                                                              | | |
+| | |   This is the place for game story. It is not complete yet , but in  | | |
+| | |   nearest future you will be able to find very long and interesting  | | |
+| | |   story about the poor chamber whose name is Bob and who live all    | | |
+| | |   him live as a timber in his own forest in village                  | | |
+| | |                                                                      | | |
+| | |                                                                      | | |
+| | |                                                                      | | |
+| | |   __ _  /\___                                                        | | |
+| | |   |-- \|++++| Conditions:                                            | | |
+| | |   \---/\++++/ -If(score<=0) -> you lose.                             | | |
+| | |    | |  \++/  -If you dont avoid any branch -> you lose.             | | |
+| | |     |    ||   Goal:                                                  | | |
+| | |    \|    ||/  -To live as much time as you can.                      | | |
+| | |     |/   ||   -Avoid duing.                                          | | |
+| | |    ---   /|   Score:                                                 | | |
+| | |         |  \  -Time of living = record                 ver. 1.102    | | |
+* * *----------------------------------------------------------------------* * *
+* * *----------------------------------------------------------------------* * *
+* * *----------------------------------------------------------------------* * *

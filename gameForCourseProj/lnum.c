@@ -2,11 +2,32 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ncurses.h>
 
 #define max(a,b) ((a>b)?(a):(b))
 
 const int base=1000*1000*1000;
 const int baseNUM=9;
+
+int lnum_compare(lnum num1, lnum num2)
+{
+	int i;
+	if( num1.length > num2.length ){
+		return 1;
+	}else if(num2.length > num1.length){
+		return -1;
+	}else if(num1.length == num2.length){
+		i = 0;
+		while( i < num1.length ){
+			if( num1.mass[i] > num2.mass[i] )
+				return 1;
+			else if( num2.mass[i] > num1.mass[i] )
+				return -1;
+			i++;
+		}
+	}
+	return 0;
+}
 
 lnum div_lnum_to_small(lnum num1,int num2)
 {
@@ -23,7 +44,6 @@ lnum div_lnum_to_small(lnum num1,int num2)
 		num1.mass=(int*)realloc(num1.mass,sizeof(int)*(num1.length-1));
 		num1.length--;
 	}
-	num1.remain=extra;
 	return num1;
 }
 
@@ -193,5 +213,11 @@ void lnum_write(lnum num)
 	printf("%d",(num.length==0)?(0):(num.mass[num.length-1]));
 	for(i=num.length-2;i>=0;i--)
 		printf("%09d",num.mass[i]);
-	printf(",%d",num.remain);
+}
+void wlnum_write(WINDOW* win, lnum num)
+{
+	int i;
+	wprintw(win, "Score:%d",(num.length==0)?(0):(num.mass[num.length-1]));
+	for(i=num.length-2;i>=0;i--)
+		wprintw(win, "%09d",num.mass[i]);
 }
