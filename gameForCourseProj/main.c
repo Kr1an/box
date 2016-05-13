@@ -6,7 +6,7 @@
 #include "shop.h"
 
 /*GAME VERSION*/
-const float GAME_VERSION = 1.105;
+const float GAME_VERSION = 0.97;
 /*END OF GAME VERSION*/
 
 /*CONTROL KEYS*/
@@ -19,15 +19,18 @@ char CONTROL_KEY_ENTER = '\n' ;
 char CONTROL_KEY_END = 'u' ;
 /*WILL BE ABLE TO CHANGE IN SETTING SOON*/
 
-/*CAN BE CHANGED IN SETTING*/   /*  hard     normal     hard  */
+/*CAN BE CHANGED IN SETTING*/   /*  hard     normal     easy  */
 int DIFFICULT_DELAY = 5;        /* var = 2; var = 5; var = 20;*/
+int DIFFICULT_LIVE = 3;         /* var = 1; var = 3; var = 20;*/
+int DIFFICULT_AXELEVEL = 2;     /* var = 1; var = 2; var = 5; */
 int DIFFICULT_DENSITY = 3;      /* var = 1; var = 3; var = 8; */ 
-int DIFFICULT_SLEEP_DELAY = 1;  /* var = 2; var = 1 ;var = 1; */
-int DIFFICULT = 2;				  /* 1->knife 2->axe 3-chainsaw*/
+int DIFFICULT_SLEEP_DELAY = 1;  /* var = 2; var = 1; var = 1; */
+int DIFFICULT = 2;				  /* knife  ; axe    ; chainsaw */
 /*SET UP THE DIFFICULTY OF GAME*/
 
 /*RECORDS VARIABLES*/
 int TIME_START;
+int TIME_START_SHOP;
 int LIVE;
 int AXELEVEL;
 /*END OF RECORDS VARIABLES*/
@@ -78,6 +81,8 @@ static void printTime(int y, int x );
 static void GamePrintInfo();
 static void SettingRule();
 static void GameVersionPrint(int y, int x);
+static void liveReducePrint(int y, int x);
+static void heroDeathPrint(int y, int x);
 /*END OF FUNCTION DECLARATION*/
 
 int main(void)
@@ -86,7 +91,7 @@ int main(void)
 	int  cond=0;
 	initscr();
 	noecho();
-	
+	printw("\a");	
 	while(TRUE)
 	{	
 		MenuPrint(cond);
@@ -215,19 +220,25 @@ static void SettingDifficultSelection(int * cond)
 			*cond = 1;
 			break;
 		case 1:
-			DIFFICULT_DELAY = 20;
+			DIFFICULT_AXELEVEL = 5;
+			DIFFICULT_LIVE = 20;
+			DIFFICULT_DELAY = 5;
 			DIFFICULT_DENSITY = 8;
 			DIFFICULT_SLEEP_DELAY = 2;	
 			DIFFICULT = 1;
 			break;
 		case 2:
+			DIFFICULT_AXELEVEL = 2;
+			DIFFICULT_LIVE = 3;
 			DIFFICULT_DELAY = 5;
 			DIFFICULT_DENSITY = 3;
 			DIFFICULT_SLEEP_DELAY = 1;
 			DIFFICULT = 2;
 			break;
 		case 3:
-			DIFFICULT_DELAY = 2;
+			DIFFICULT_DELAY = 3;
+			DIFFICULT_AXELEVEL = 1;
+			DIFFICULT_LIVE = 1;
 			DIFFICULT_SLEEP_DELAY = 2;
 			DIFFICULT_DENSITY = 1;
 			DIFFICULT = 3;
@@ -529,11 +540,14 @@ static void printDisplay(struct Branch* obj,char mode,char ch)
 			if(obj->left & 1){
 				if( LIVE >= 1)
 				{
-					if(mode == 'p')
+					if(mode == 'p'){
 						LIVE--;
+					}
 					printTree((mode == 'p')?(6):(3), *obj);
 					printTree(5,*obj);
 					GamePrintInfo();
+					liveReducePrint(5, 32);
+					heroDeathPrint(15, 21);
 					sleep();	
 					return;
 				}
@@ -547,11 +561,14 @@ static void printDisplay(struct Branch* obj,char mode,char ch)
 			if(obj->right & 1){
 				if( LIVE >= 1)
 				{
-					if(mode == 'p')
+					if(mode == 'p'){
 						LIVE--;
+					}
 					printTree((mode == 'p')?(7):(4),*obj);
 					printTree(5,*obj);
 					GamePrintInfo();
+					liveReducePrint(5, 32);
+					heroDeathPrint(15, 46);
 					sleep();
 					return;
 				}
@@ -579,7 +596,6 @@ static void GamePrintInfo()
 	printTime(4, 6);
 	printScore( 7, 6 );
 	shop_printInGame( 6, 64 );
-	/*GameVersionPrint( 19, 6 );*/
 	gameInfo(17, 6);
 }
 static void gameInfo(int y, int x)
@@ -632,14 +648,17 @@ static void nextObjMap(struct Branch* obj)
 }
 static void Game()
 {
+	int time_begin;
 	char ch='a';
 	char chEx='0';
 	struct Branch obj;
 	int temp=BASE;
-	_SCORE = lnum_read("2000");
+	_SCORE = lnum_read("100");
 	TIME_START = time(NULL);
-	AXELEVEL = 1;
-	LIVE = 3;
+	
+	LIVE = DIFFICULT_LIVE;
+	AXELEVEL = DIFFICULT_AXELEVEL;
+	
 	EXIT=0;
 	halfdelay( DIFFICULT_DELAY );
 	obj.left=0;
@@ -652,24 +671,47 @@ static void Game()
 			printDisplay(&obj,'0',ch);
 			if ( EXIT == TRUE )
 				return;
-			ch=getch();
+
+		time_begin = time(NULL);
+		ch = ERR;
+		while( time(NULL) - time_begin < 1 && ch == ERR)
+		{
+			ch = getch();
+			switch(ch)
+			{
+				case 'a': 
+					break;
+				case 'd': 
+					break;
+				case 'i': 
+					break;
+				case 'u': 
+					break;
+				default:
+					ch = ERR;
+					break;
+			}
+		}
 			if( ch == CONTROL_KEY_SHOP )
 			{
-				shop_Shop(stdscr,&_SCORE, &LIVE, &AXELEVEL);
+				TIME_START_SHOP = time(NULL);
+				shop_Shop(stdscr,&_SCORE, &LIVE, &AXELEVEL, time(NULL) - TIME_START);
+				TIME_START += (time(NULL) - TIME_START_SHOP);
 			}
 			if( ch == CONTROL_KEY_LEFT || ch == CONTROL_KEY_RIGHT ){
-				_SCORE = multi_lnum_to_shot(_SCORE, 2);
+				_SCORE = lnum_sum(_SCORE, multi_lnum_to_shot(lnum_read("5"), AXELEVEL * 2));
 			}
-			if(ch==ERR){
-				if( lnum_compare(_SCORE, lnum_read("400")) <= 0){
+			if(ch==ERR || time(NULL) % 5 == 0){
+				if( lnum_compare(_SCORE, multi_lnum_to_shot(lnum_read("5"), (time(NULL) - TIME_START ) /4 )) <= 0){
 					_SCORE = lnum_read("0");
 					EXIT = 1;
 				}else
-					_SCORE = lnum_deduct(_SCORE, lnum_read("400"));
+					_SCORE = lnum_deduct(_SCORE, multi_lnum_to_shot(lnum_read("5"), (time(NULL) - TIME_START ) / 4 ));
 			}
 			if(ch==ERR || (ch != CONTROL_KEY_END && ch != CONTROL_KEY_LEFT && ch != CONTROL_KEY_RIGHT ) ) 
 				ch=chEx;	
 	}
+	
 	EXIT = 0;
 	return;
 }
@@ -730,5 +772,72 @@ static void sleep()
 	int i;
 	for(i=0;i<(6000000/DIFFICULT_SLEEP_DELAY) && EXIT == 0 ;i++){}
 }
+static void liveReducePrint(int y, int x)
+{
+	int WHIGTH = 5;
+	int WLENGTH = 18;
+	int WYCOORD = y;
+	int WXCOORD = x;
+	FILE* file = NULL;
+	char* str=(char*)malloc(sizeof(char)*81);
+	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+	/*Open needed file to make "animation"*/
+	file=fopen("game/liveReduce.txt","r");
+	/*clean the main win(stdscr)*/
+	wrefresh(win);
+	/*fullfill setting area*/
+	strcpy(str,"");
+	while(fgets(str,81,file))
+	{
+		wprintw(win, "%s",str);
+		strcpy(str,"");
+	}
+	/*close the file*/
+	fclose(file);
+	
+	wrefresh(win);
+	delwin(win);
+
+	WHIGTH = 1;
+	WLENGTH = 7;
+	WYCOORD = y + 3;
+	WXCOORD = x + 9;
+
+	win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+
+	wprintw(win, "%d", LIVE); 
+	wrefresh(win);
+	delwin(win);
+	return;
+}
+static void heroDeathPrint(int y, int x)
+{
+	int WHIGTH = 5;
+	int WLENGTH = 12;
+	int WYCOORD = y;
+	int WXCOORD = x;
+	FILE* file = NULL;
+	char* str=(char*)malloc(sizeof(char)*81);
+	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+	/*Open needed file to make "animation"*/
+	file=fopen("game/heroDeath.txt","r");
+	/*clean the main win(stdscr)*/
+	wrefresh(win);
+	/*fullfill setting area*/
+	strcpy(str,"");
+	while(fgets(str,81,file))
+	{
+		wprintw(win, "%s",str);
+		strcpy(str,"");
+	}
+	/*close the file*/
+	fclose(file);
+	wrefresh(win);
+	delwin(win);
+	return;
+}
 
 /***********************END_GAME***********************/
+
+
+
