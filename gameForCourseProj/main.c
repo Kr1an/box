@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include "lnum.h"
 #include "shop.h"
+#include "scoreManage.h"
 
 /*GAME VERSION*/
 const float GAME_VERSION = 0.97;
@@ -448,7 +449,7 @@ static void MenuSelection(/*choice from main menu*/int* cond)
 			break;
 		case 2:
 			/*show info about game by changing cond to zero: menuNetral.txt*/
-			*cond=0;
+			Menu_Records(stdscr);
 			break;
 		case 3:
 			/*show setting part of menu*/
@@ -670,7 +671,7 @@ static void Game()
 			printDisplay(&obj,'p',ch);
 			printDisplay(&obj,'0',ch);
 			if ( EXIT == TRUE )
-				return;
+				break;
 
 		time_begin = time(NULL);
 		ch = ERR;
@@ -710,9 +711,13 @@ static void Game()
 			}
 			if(ch==ERR || (ch != CONTROL_KEY_END && ch != CONTROL_KEY_LEFT && ch != CONTROL_KEY_RIGHT ) ) 
 				ch=chEx;	
-	}
-	
+	}	
 	EXIT = 0;
+	if(time(NULL) - TIME_START >= 10)
+		Score_write(stdscr, time(NULL) - TIME_START );
+	erase();
+	refresh();
+	halfdelay(5);
 	return;
 }
 static void printTree(int num,struct Branch obj)

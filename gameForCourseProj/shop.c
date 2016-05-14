@@ -31,7 +31,7 @@ void shop_Variants(lnum *SCORE, int *LIVE, int *AXELEVEL)
 	wprintw( win, "|  <a>  |  <s>   |  <q>  |");
 	wprintw( win, "+-------+--------+-------+");	
 	wprintw( win, "|+axelvl|  +live | close |");
-	wprintw( win, "|(%3d)  | (%3d)  | shop  |", *AXELEVEL <= 9 ? *AXELEVEL * 100 : 900, 30 * (*AXELEVEL) );
+	wprintw( win, "|(%4d) | (%4d) | shop  |", *AXELEVEL <= 9 ? *AXELEVEL * 1000 : 9000, 300 * (*AXELEVEL) );
 	wprintw( win, "+-------+--------+-------+");
 	wrefresh(win);
 	delwin(win);
@@ -66,10 +66,10 @@ void shop_Shop(WINDOW* win, lnum *SCORE, int *LIVE, int *AXELEVEL, int TIME)
 	while( (ch=getch()) != 'q')
 	{
 		if(*AXELEVEL <= 9)
-			costAxe = multi_lnum_to_shot(lnum_read("100"), *AXELEVEL);
+			costAxe = multi_lnum_to_shot(lnum_read("1000"), *AXELEVEL);
 		else
-			costAxe = multi_lnum_to_shot(lnum_read("100"), 9);
-		costLive = multi_lnum_to_shot(lnum_read("30"), *AXELEVEL);
+			costAxe = multi_lnum_to_shot(lnum_read("1000"), 9);
+		costLive = multi_lnum_to_shot(lnum_read("300"), *AXELEVEL);
 		if(ch == 'a'){
 			if(lnum_compare(*SCORE, multi_lnum_to_shot(lnum_read("5"), TIME / 2)) > 0 && lnum_compare(*SCORE, costAxe) > 0  ){
 				(*AXELEVEL)++;
@@ -78,7 +78,7 @@ void shop_Shop(WINDOW* win, lnum *SCORE, int *LIVE, int *AXELEVEL, int TIME)
 		}else if( ch == 's' ){
 			if(lnum_compare(*SCORE, multi_lnum_to_shot(lnum_read("5"), TIME / 2)) > 0 && lnum_compare(*SCORE, costLive) > 0  ){
 				(*LIVE)++;
-				*SCORE = lnum_deduct(*SCORE, multi_lnum_to_shot(lnum_read("30"), *AXELEVEL));
+				*SCORE = lnum_deduct(*SCORE, multi_lnum_to_shot(lnum_read("300"), *AXELEVEL));
 			}
 		}
 		file=fopen("shop/inShop.txt","r");
