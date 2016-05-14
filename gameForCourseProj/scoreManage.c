@@ -74,7 +74,10 @@ char* nicknameEnter(WINDOW* win)
 			noecho();
 			return NULL;
 		}
-		playerName[strlen(playerName)] = '\0';
+		if( strlen(playerName) > 8)
+			playerName[8] = '\0';
+		else
+			playerName[strlen(playerName)] = '\0';
 		if( isName(playerName)){
 			werase(win);
 			wprintw(win, "Nickname already exist: enter another one: ");
@@ -136,7 +139,7 @@ void writeScore(char* playerName, int TIME)
 	file = fopen("score/score.txt","a");
 	if( file == NULL || playerName == NULL)
 		return;
-	fprintf( file, "%s\t\t%d:%d\n", playerName, TIME / 60, TIME % 60);
+	fprintf( file, "%s\t%d:%d\n", playerName, TIME / 60, TIME % 60);
 	fclose(file);
 	return;
 }

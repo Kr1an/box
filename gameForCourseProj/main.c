@@ -260,9 +260,7 @@ static void SettingSelection(int * cond)
 		case 0:
 			*cond = 1;
 			break;
-		case 1:
-			printw("controlSetting");
-			Exit();		
+		case 1:	
 			/*SettingControl(); WILL BE SOON*/ 
 			break;
 		case 2:

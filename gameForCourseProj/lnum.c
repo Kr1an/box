@@ -1,4 +1,4 @@
-#include "../courseProj/lnum.h"
+#include "lnum.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
