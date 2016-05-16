@@ -1,8 +1,8 @@
 ____________
 |##OPTION##|
 |          |
-|  Control |
+| DelScore |
 |   Rules  |
 |  Diffic  |
-|   EXIT   |
+|   Exit   |
 |__________|

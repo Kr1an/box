@@ -1,7 +1,7 @@
 ____________
 |##OPTION##|
 |          |
-|  Control |
+| DelScore |
 |###RULES##|
 |  Diffic  |
 |   Exit   |

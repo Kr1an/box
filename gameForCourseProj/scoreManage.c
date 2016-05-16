@@ -4,6 +4,8 @@
 #include <string.h>
 #include "scoreManage.h"
 
+
+
 void Score_write(WINDOW* win, int TIME)
 {
 	int WHIGTH = 4;
@@ -14,9 +16,29 @@ void Score_write(WINDOW* win, int TIME)
 	print_Background(win);
 	
 	WINDOW* winS = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+	wprintw(winS, "Time %d:%d", TIME / 60, TIME % 60);
+	wrefresh(winS);
 	writeScore( nicknameEnter(winS), TIME );
 	delwin(winS);
 	return;
+}
+
+int flen(char* name)
+{
+	FILE* file = NULL;
+	int len = 0;
+	char *temp = NULL;
+
+	temp = (char*)malloc(sizeof(char) * 20);
+	file = fopen(name, "r");
+	if(file == NULL || temp == NULL)
+		exit_Error();
+	while(fgets(temp, 19, file))
+	{
+		len++;
+	}
+	fclose(file);
+	return len;
 }
 
 void Menu_Records(WINDOW* win)
@@ -27,26 +49,70 @@ void Menu_Records(WINDOW* win)
 	int WYCOORD = 5;
 	int WXCOORD = 23;
 	int scoreCount = 0;
- FILE* file = NULL;
+ 	int i = 0;
+	int j = 0;
+	int max_ind;
+	FILE* file = NULL;
+	FILE* tfile = NULL;
 	char* score = NULL;
+	char* time = NULL;
 	WINDOW* winS = NULL;
+	Score * sTable = NULL;
+	Score max;
 	char ch = '0';
 	print_RecordBackground(win);
 	
 	winS = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
-
-
+	
+	max.score = (char*)malloc(sizeof(char) * 100);
+	sTable = (Score*)malloc(sizeof(Score) * flen("score/time.txt"));
+	for( i = 0; i < flen("score/time.txt"); i++ )
+	{
+		sTable[i].score = (char*)malloc( sizeof(char) * 100);
+		strcpy(sTable[i].score, "");
+		sTable[i].time = 0;
+	}
+	time = (char*)malloc (sizeof(char) * 100);
 	score = (char*)malloc (sizeof(char)* 100);
 	file = fopen("score/score.txt", "r");
-	if(file == NULL || score == NULL)
+	tfile = fopen("score/time.txt", "r");
+	if(file == NULL || score == NULL || tfile == NULL)
 		exit_Error();
 	strcpy(score, "");
+	strcpy(time, "");
 	werase(winS);
-	while(fgets(score, 99, file) && scoreCount <= 9)
+	for(i = 0; i < flen("score/time.txt"); i++)
+	{
+		fgets(score, 99, file);
+		fgets(time, 99, tfile);
+		strcpy(sTable[i].score, score);
+		sTable[i].time = atoi(time);
+	}
+	for(i = 0; i < 10; i++)
+	{
+		strcpy(max.score, "");
+		max.time = 0;
+		for(j = 0; j < flen("score/time.txt"); j++)
+		{
+			if(sTable[j].time > max.time)
+			{
+				max.time = sTable[j].time;
+				strcpy(max.score, "");
+				strcpy(max.score, sTable[j].score);
+				max_ind = j;
+			}
+		}
+		if(max.time > 0)
+		{
+			wprintw(winS, "%s", max.score);
+			sTable[max_ind].time = 0;
+		}
+	}
+/*	while(fgets(score, 99, file) && scoreCount <= 9)
 	{
 		wprintw(winS,"%s",score);
 		scoreCount++;
-	}
+	}*/
 	wrefresh(winS);
 	while( (ch = getch()) != '\n' ){}
 	fclose(file);
@@ -65,7 +131,6 @@ char* nicknameEnter(WINDOW* win)
 		exit_Error();
 	strcpy(playerName, "");
 	echo();
-	werase(win);
 	wprintw(win, "\nEnter your Nickname: ");
 	wrefresh(win);
 	do{
@@ -74,8 +139,8 @@ char* nicknameEnter(WINDOW* win)
 			noecho();
 			return NULL;
 		}
-		if( strlen(playerName) > 8)
-			playerName[8] = '\0';
+		if( strlen(playerName) > 6)
+			playerName[6] = '\0';
 		else
 			playerName[strlen(playerName)] = '\0';
 		if( isName(playerName)){
@@ -135,12 +200,15 @@ void saveNickname(char* name)
 
 void writeScore(char* playerName, int TIME)
 {
-	FILE *file;
+	FILE *file, *tfile;
 	file = fopen("score/score.txt","a");
+	tfile = fopen("score/time.txt","a");
 	if( file == NULL || playerName == NULL)
 		return;
-	fprintf( file, "%s\t%d:%d\n", playerName, TIME / 60, TIME % 60);
+	fprintf( file, "%s\t\t%d:%d\n", playerName, TIME / 60, TIME % 60);
+	fprintf( tfile, "%d\n", TIME);
 	fclose(file);
+	fclose(tfile);
 	return;
 }
 

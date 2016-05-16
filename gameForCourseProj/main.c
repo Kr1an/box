@@ -7,7 +7,7 @@
 #include "scoreManage.h"
 
 /*GAME VERSION*/
-const float GAME_VERSION = 0.97;
+const float GAME_VERSION = 0.99;
 /*END OF GAME VERSION*/
 
 /*CONTROL KEYS*/
@@ -62,6 +62,7 @@ struct Branch /*STRUCTURE TO STORE THE MAP OF TREE . EXAMPLE : left == 010010 AN
 static void printSettingDifficult(WINDOW* sWin, int cond);
 static void SettingDifficultSelection(int * cond);
 static void SettingDifficult();
+static void SettingDelScore();
 static void SettingSelection(int * cond);
 static void sleep();
 static void MenuPrint(int cond);
@@ -122,7 +123,7 @@ int main(void)
 /******************BEGIN_SETTING*******************/
 static void Setting()
 {
-	int cond=0;
+	int cond=1;
 	char ch='0';
 	const int WHIGTH=8+1;
 	const int WLENGTH=13;
@@ -177,7 +178,7 @@ static void SettingRule()
 
 static void SettingDifficult()
 {
-	int cond=0;
+	int cond=1;
 	char ch='0';
 	const int WHIGTH=8;
 	const int WLENGTH=13;
@@ -252,6 +253,33 @@ static void SettingDifficultSelection(int * cond)
 	}
 	return;
 }
+static void SettingDelScore()
+{
+	FILE* file = NULL;
+	const int WHIGTH=1;
+	const int WLENGTH=10;
+	const int WYCOORD=8;
+	const int WXCOORD=31;
+	WINDOW *sWin=newwin(WHIGTH,WLENGTH,WYCOORD,WXCOORD);
+	
+	wprintw(sWin, "LISTsEMPTY");
+	wrefresh(sWin);
+	delwin(sWin);
+	getchar();
+
+	file = fopen("score/score.txt","w");
+	fclose(file);
+	file = fopen("score/time.txt", "w");
+	fclose(file);
+	file = fopen("score/Nickname.txt", "w");
+	fclose(file);
+
+
+	
+	
+	
+	return;
+}
 
 static void SettingSelection(int * cond)
 {
@@ -260,8 +288,8 @@ static void SettingSelection(int * cond)
 		case 0:
 			*cond = 1;
 			break;
-		case 1:	
-			/*SettingControl(); WILL BE SOON*/ 
+		case 1:
+			SettingDelScore();
 			break;
 		case 2:
 			SettingRule();	
