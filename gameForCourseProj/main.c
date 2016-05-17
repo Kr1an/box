@@ -253,6 +253,7 @@ static void SettingDifficultSelection(int * cond)
 	}
 	return;
 }
+
 static void SettingDelScore()
 {
 	FILE* file = NULL;
@@ -273,11 +274,6 @@ static void SettingDelScore()
 	fclose(file);
 	file = fopen("score/Nickname.txt", "w");
 	fclose(file);
-
-
-	
-	
-	
 	return;
 }
 
@@ -343,6 +339,7 @@ static void printSettingDifficult(WINDOW*sWin,int cond)
 		wprintw(sWin,"%s",str);
 		strcpy(str,"");
 	}
+	free(str);
 	wrefresh(sWin);
 	fclose(file);
 	GameVersionPrint(19, 61);
@@ -376,12 +373,14 @@ static void printStdscr(int cond)
 		printw("%s",str);
 		strcpy(str,"");
 	}
+	free(str);
 	/*close the file*/
 	fclose(file);
 	/*make setting scr visible*/
 	refresh();
 	return;
 }
+
 static void printSetting(WINDOW*sWin,int cond)
 {
 	FILE *file;
@@ -425,8 +424,10 @@ static void printSetting(WINDOW*sWin,int cond)
 		printDifficultMod( 3 ,6 );
 	wrefresh(sWin);	
 	GameVersionPrint(19, 61);
+	free(str);
 	return;
 }
+
 static void printDifficultMod(int y,int x)
 {
 	const int WHIGTH=1;
@@ -451,6 +452,7 @@ static void printDifficultMod(int y,int x)
 
 
 /**************BEGIN_MAIN_MENU***************/
+
 /*Exit option in main menu*/
 static void Exit()
 {
@@ -461,6 +463,7 @@ static void Exit()
 	/*finish program with +0*/ 
 	exit(CORRECT_EXIT);	
 }
+
 /*selections of main menu*/
 static void MenuSelection(/*choice from main menu*/int* cond)
 {
@@ -540,12 +543,15 @@ static void MenuPrint(int cond)
 	refresh();
 	fclose(file);
 	GameVersionPrint(19, 61);
+	free(temp);
 	return;
 }
+
 /*******************END_MAIN_MENU**********************/
 
 
 /*******************BEGIN_GAME*************************/
+
 static void printDisplay(struct Branch* obj,char mode,char ch)
 {
 	char temp;
@@ -572,9 +578,11 @@ static void printDisplay(struct Branch* obj,char mode,char ch)
 					}
 					printTree((mode == 'p')?(6):(3), *obj);
 					printTree(5,*obj);
+					refresh();
 					GamePrintInfo();
 					liveReducePrint(5, 32);
 					heroDeathPrint(15, 21);
+					refresh();
 					sleep();	
 					return;
 				}
@@ -593,9 +601,11 @@ static void printDisplay(struct Branch* obj,char mode,char ch)
 					}
 					printTree((mode == 'p')?(7):(4),*obj);
 					printTree(5,*obj);
+					refresh();
 					GamePrintInfo();
 					liveReducePrint(5, 32);
 					heroDeathPrint(15, 46);
+					refresh();
 					sleep();
 					return;
 				}
@@ -613,10 +623,13 @@ static void printDisplay(struct Branch* obj,char mode,char ch)
 			return ;
 		}
 	printTree(5,*obj);
+	refresh();
 	GamePrintInfo();
+	
 	sleep();
 	return;
 }
+
 static void GamePrintInfo()
 {
 	printDifficultMod( 3, 6 );
@@ -625,6 +638,7 @@ static void GamePrintInfo()
 	shop_printInGame( 6, 64 );
 	gameInfo(17, 6);
 }
+
 static void gameInfo(int y, int x)
 {
 	const int WHIGTH = 3;
@@ -634,8 +648,10 @@ static void gameInfo(int y, int x)
 	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);	
 	wprintw(win, "a,d-cont;\nu-exit;\ni-shop"); 
 	wrefresh(win);
+	delwin(win);
 	return;
 }
+
 static void printTime(int y, int x)
 {
 	const int WHIGTH = 3;
@@ -650,6 +666,7 @@ static void printTime(int y, int x)
 	delwin(win);
 	return;
 }
+
 static void printScore(int y,int x)
 {
 	const int WHIGTH = 3;
@@ -660,7 +677,9 @@ static void printScore(int y,int x)
 	wlnum_write(win, _SCORE);
 	wrefresh(win);
 	delwin(win);
+	return;
 }
+
 static void nextObjMap(struct Branch* obj)
 {
 	int temp=BASE;
@@ -672,7 +691,9 @@ static void nextObjMap(struct Branch* obj)
 		else
 			obj->right|=temp;
 	}
+	return;
 }
+
 static void Game()
 {
 	int time_begin;
@@ -680,16 +701,16 @@ static void Game()
 	char chEx='0';
 	struct Branch obj;
 	int temp=BASE;
+	
 	_SCORE = lnum_read("100");
 	TIME_START = time(NULL);
-	
 	LIVE = DIFFICULT_LIVE;
 	AXELEVEL = DIFFICULT_AXELEVEL;
-	
 	EXIT=0;
 	halfdelay( DIFFICULT_DELAY );
 	obj.left=0;
 	obj.right=0;
+
 	while( !(_SCORE.mass[0] == 0 && _SCORE.length == 1) && EXIT==0)
 	{
 		nextObjMap(&obj);
@@ -746,6 +767,7 @@ static void Game()
 	halfdelay(5);
 	return;
 }
+
 static void printTree(int num,struct Branch obj)
 {
 	const int SizeOfExString=30;
@@ -795,14 +817,17 @@ static void printTree(int num,struct Branch obj)
 		printw("%s",str);
 		strcpy(str,"");
 	}
-	refresh();
+	free(str);
 	fclose(file);
+	return;
 }
+
 static void sleep()
 {
 	int i;
 	for(i=0;i<(6000000/DIFFICULT_SLEEP_DELAY) && EXIT == 0 ;i++){}
 }
+
 static void liveReducePrint(int y, int x)
 {
 	int WHIGTH = 5;
@@ -825,7 +850,8 @@ static void liveReducePrint(int y, int x)
 	}
 	/*close the file*/
 	fclose(file);
-	
+	free(str);
+
 	wrefresh(win);
 	delwin(win);
 
@@ -865,10 +891,7 @@ static void heroDeathPrint(int y, int x)
 	fclose(file);
 	wrefresh(win);
 	delwin(win);
+	free(str);
 	return;
 }
-
 /***********************END_GAME***********************/
-
-
-

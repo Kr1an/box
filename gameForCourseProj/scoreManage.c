@@ -38,6 +38,7 @@ int flen(char* name)
 		len++;
 	}
 	fclose(file);
+	free(temp);
 	return len;
 }
 
@@ -108,20 +109,15 @@ void Menu_Records(WINDOW* win)
 			sTable[max_ind].time = 0;
 		}
 	}
-/*	while(fgets(score, 99, file) && scoreCount <= 9)
-	{
-		wprintw(winS,"%s",score);
-		scoreCount++;
-	}*/
 	wrefresh(winS);
 	while( (ch = getch()) != '\n' ){}
 	fclose(file);
+	fclose(tfile);
 	free(score);
+	free(time);
 	delwin(winS);
 	return;
 }
-
-
 
 char* nicknameEnter(WINDOW* win)
 {
@@ -209,6 +205,7 @@ void writeScore(char* playerName, int TIME)
 	fprintf( tfile, "%d\n", TIME);
 	fclose(file);
 	fclose(tfile);
+	free(playerName);
 	return;
 }
 
@@ -230,10 +227,10 @@ void print_RecordBackground(WINDOW* win)
 	}
 	/*close the file*/
 	fclose(file);
+	free(str);
 	wrefresh(win);
 	return;
 }
-
 void print_Background(WINDOW* win)
 {
 	FILE* file = NULL;
@@ -241,7 +238,6 @@ void print_Background(WINDOW* win)
 	/*Open needed file to make "background"*/
 	file=fopen("score/scoreSaveScr.txt","r");
 	/*clean the main win(stdscr)*/
-	
 	werase(win);
 	/*fullfill setting area*/
 	strcpy(str,"");
@@ -252,6 +248,7 @@ void print_Background(WINDOW* win)
 	}
 	/*close the file*/
 	fclose(file);
+	free(str);
 	wrefresh(win);
 	return;
 }

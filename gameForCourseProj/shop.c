@@ -13,11 +13,11 @@ void shop_printScore(lnum *SCORE)
 	int WLENGTH = 70;
 	int WXCOORD = 5; 
 	int WYCOORD = 21;
+	
 	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
 	wlnum_write(win, *SCORE); 
 	wrefresh(win);	
 	delwin(win);
-
 	return;
 }
 void shop_Variants(lnum *SCORE, int *LIVE, int *AXELEVEL)
@@ -26,7 +26,9 @@ void shop_Variants(lnum *SCORE, int *LIVE, int *AXELEVEL)
 	int WLENGTH = 26;
 	int WXCOORD = 50; 
 	int WYCOORD = 15;
+	
 	WINDOW* win = newwin( WHIGTH, WLENGTH, WYCOORD, WXCOORD);
+	
 	wprintw( win, "+-------+--SHOP--+-------+");
 	wprintw( win, "|  <a>  |  <s>   |  <q>  |");
 	wprintw( win, "+-------+--------+-------+");	
@@ -51,7 +53,6 @@ void shop_Variants(lnum *SCORE, int *LIVE, int *AXELEVEL)
 	delwin(win);
 
 	shop_printScore(SCORE);
-
 	return;
 }
 void shop_Shop(WINDOW* win, lnum *SCORE, int *LIVE, int *AXELEVEL, int TIME)
@@ -93,7 +94,7 @@ void shop_Shop(WINDOW* win, lnum *SCORE, int *LIVE, int *AXELEVEL, int TIME)
 		shop_Variants(SCORE, LIVE, AXELEVEL);
 		fclose(file);
 	}
-	
+	free(str);
 	return;
 }
 void shop_printInGame(int y, int x)
@@ -119,5 +120,6 @@ void shop_printInGame(int y, int x)
 	wrefresh(win);
 	delwin(win);
 	fclose(file);
+	free(str);
 	return;	
 }

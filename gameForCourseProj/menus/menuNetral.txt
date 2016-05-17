@@ -1,9 +1,9 @@
 * * *----------------------------------------------------------------------* * *
 * * *----------------------------------------------------------------------* * *
 * * *----------------------------------------------------------------------* * *
-| | | DISCRIPTION:Game about Bob,who's live and savary depends on how many | | |
-| | |    tree he have got.                                                 | | |
-| | | MAIL:Kr1an@hotmail.com; ____________ GOAL:make course proj better.   | | |
+| | | -DISCRIPTION:Game is about cutting trees as long as you can.         | | |
+| | |  Nothing special, but lnum is included to count.                     | | |
+| | | -MAIL:Kr1an@yandex.by   ____________ GOAL:Time's score in the game.  | | |
 | | | ----------------------  |##TIMBER##| ------------ __---------------  | | |
 | | |   trees      push'w'/\  |          |             /__\                | | |
 | | |    |----.           ||  |   Game   |            //^^\\               | | |
@@ -15,7 +15,7 @@
 | | |    | |  \++/                                    || |\                | | |
 | | |     |    ||                                     ^^ ^^                | | |
 | | |    \|    ||/                                                         | | |
-| | |     |/   ||    <==bob's forest                                       | | |
+| | |     |/   ||    <==he's forest                                        | | |
 | | |    ---   /|                                                          | | |
 | | |         |  \                                           ver. 1.102    | | |
 * * *----------------------------------------------------------------------* * *
